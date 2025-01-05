@@ -31,5 +31,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            your_dockerhub_username/your_image_name:${{ github.sha }}
-            your_dockerhub_username/your_image_name:latest
+            reocoker/nginx-diplom:${{ github.sha }}
+            reocoker/nginx-diplom:latest
