@@ -1,0 +1,30 @@
+name: Deploy to Kubernetes via SSH
+
+on:
+  create:
+    types: [ tag ]
+
+jobs:
+  deploy-to-k8s:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get Tag Name
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Install SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Connect to master node and execute commands
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@84.201.170.86 << EOF
+          export KUBECONFIG=~/.kube/config
+          kubectl set image deployment/nginx-diplom nginx-diplom=reocoker/nginx-diplom:${{ env.TAG_NAME }} --record
+          kubectl rollout status deployment/nginx-diplom
+          EOF
